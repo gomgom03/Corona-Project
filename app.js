@@ -12,5 +12,9 @@ app.set('view engine', 'ejs');
 
 
 app.get('/', (req, res) => {
-    res.render('simulation.ejs');
+    res.render("home.ejs");
+})
+
+app.get('/simulation', (req, res) => {
+    res.render("simulation.ejs");
 })

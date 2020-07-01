@@ -1,26 +1,181 @@
 
 let time = Date.now();
 
-const mapSize = 750
 const pixelSize = 250
 let savedMap = null;
 let scenes = [];
 const numHouses = 100;
-const humansPerHouseHold = 3;
 const frameTime = 10;
 const numElem = document.getElementById("num");
 const loadStateSubElem = document.querySelector("#loadStateSub");
+const spinnerElem = document.getElementById("spinner")
+let curInfected = 1;
+let batchId = null;
+let endConfigResolved = true;
+let param = {
+    tileWidth: 3,
+    humansPerHouseHold: 2,
+    tRate: 0.4,
+    maskDegrade: 0.2,
+    asympRate: 0.8,
+    tRateLoss: 3,
+    airflow: 0.5,
+    pGroc: 4 / 7,
+    pRes: 5 / 7,
+    pPark: 6 / 7,
+    curfM: 7,
+    curfN: 21,
+    mask: false,
+    carryToInf: 0.005,
+    washingHands: true,
+}
 
-let imprfdc = rfdc();
+$('#popupModal').modal({ show: false })
+
+function popupMessage(title, message) {
+    $('#modalLabel').text(title)
+    $('#popupBody').text(message)
+    $('#popupModal').modal('show');
+}
+
+//Simulation start Listener Creation
+const defaultSimulStartElem = document.getElementById("defaultSimulStart"),
+    configSimulStartElem = document.getElementById("configSimulStart"),
+    configPartsElems = Array.prototype.slice.call(document.getElementsByClassName("configParts")),
+    configOptionButtonElem = document.getElementById("configOptionButton"),
+    configOptionsElem = document.getElementById("configOptions");
+
+
+defaultSimulStartElem.addEventListener("click", () => {
+    param = {
+        tileWidth: 3,
+        humansPerHouseHold: 2,
+        tRate: 0.4,
+        maskDegrade: 0.2,
+        asympRate: 0.8,
+        tRateLoss: 3,
+        airflow: 0.5,
+        pGroc: 4 / 7,
+        pRes: 5 / 7,
+        pPark: 6 / 7,
+        curfM: 7,
+        curfN: 21,
+        mask: false,
+        carryToInf: 0.005,
+        washingHands: true,
+    }
+    endConfig();
+})
+
+configSimulStartElem.addEventListener("click", () => {
+    param = {
+        tileWidth: 3,
+        humansPerHouseHold: 2,
+        tRate: 0.4,
+        maskDegrade: 0.2,
+        asympRate: 0.8,
+        tRateLoss: 3,
+        airflow: 0.5,
+        pGroc: 4 / 7,
+        pRes: 5 / 7,
+        pPark: 6 / 7,
+        curfM: 7,
+        curfN: 21,
+        mask: false,
+        carryToInf: 0.005,
+        washingHands: true,
+    }
+    let errMessage = "";
+    let tempObj = {}
+    configPartsElems.forEach(el => {
+        let { value, id } = el;
+        if (value !== "") {
+            let val = parseInt(value);
+            value === "e" || value === "E" ? val = Math.E : null;
+            switch (id) {
+                case "tileWidth": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Tile Width> should be a positive integer. "; break;
+                case "humansPerHouseHold": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Humans Per Household> should be a positive integer. "; break;
+                case "tRate": val <= 100 && val > 0 ? tempObj[id] = val / 100 : errMessage += "<Probability of Transmission> should be greater than 0 and at most 100. "; break;
+                case "maskDegrade": val <= 100 && val >= 0 ? tempObj[id] = (100 - val) / 100 : errMessage += "<Mask Rating> should be at least 0 and at most 100. "; break;
+                case "asympRate": val <= 100 && val >= 0 ? tempObj[id] = val / 100 : errMessage += "<Probability of Asymptomatic Transmission> should be at least 0 and at most 100. "; break;
+                case "carryToInf": val <= 100 && val > 0 ? tempObj[id] = val / 100 : errMessage += "<Probabilty of Infection of those Carrying the Virus Every 10 Seconds> should be greater than 0 and at most 100. "; break;
+                case "pGroc": val <= 100 && val >= 0 ? tempObj[id] = val / 100 : errMessage += "<Probability of Going to a Grocery Store on a Given Day> should be at least 0 and at most 100. "; break;
+                case "pPark": val <= 100 && val >= 0 ? tempObj[id] = val / 100 : errMessage += "<Probability of Going to a Park on a Given Day> should be at least 0 and at most 100. "; break;
+                case "pRes": val <= 100 && val >= 0 ? tempObj[id] = val / 100 : errMessage += "<Probability of Going to a Restaurant on a Given Day> should be at least 0 and at most 100. "; break;
+                case "mask": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
+                case "washingHands": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
+                case "curfM": val <= 12 && val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Start of Day> should be an integer at least 1 and at most 12. "; break;
+                case "curfN": val <= 22 && val >= 13 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Curfew> should be an integer at least 13 and at most 22. "; break;
+                default:
+                    errMessage += "Internal Error";
+
+            }
+            tempObj[el.id] = val;
+        }
+    });
+    if (errMessage === "") {
+        for (let key in tempObj) {
+            param[key] = tempObj[key]
+        }
+
+        endConfig();
+    } else {
+        popupMessage("Error", errMessage)
+
+    }
+
+})
+
+function endConfig() {
+    if (endConfigResolved) {
+        endConfigResolved = false;
+        continueQueue = false;
+        spinnerElem.className = "d-flex justify-content-center";
+        setTimeout(() => {
+            batchId = Math.random().toString(32);
+            resetAll();
+            world.start();
+            endConfigResolved = true;
+            spinnerElem.className = "d-none";
+            configOptionsElem.className === "collapse show" ? configOptionButtonElem.click() : null;
+        }, 1000)
+    }
+}
+
+function resetAll() {
+    world.canvas != null ? document.getElementById("simulContainer").removeChild(world.canvas) : null;
+    world.canvas = null;
+    world.tiles = [];
+    world.humans = [];
+    world.origins = {
+        houses: [],
+        groceries: [],
+        restaurants: [],
+        hospitals: [],
+        parks: []
+    };
+    world.walkableTiles = [];
+    world.graph = null;
+    curInfected = 1;
+    time = Date.now();
+    savedMap = null;
+    scenes = [];
+    continueQueue = true;
+    intervalTime = 100;
+    curSceneNum = 0;
+    clearSceneIntervals();
+}
+
 
 const world = {
-    canvas: document.createElement('canvas'),
+    canvas: null,
     start: function () {
-        this.canvas.width = mapSize;
-        this.canvas.height = mapSize;
-        this.tileWidth = mapSize / pixelSize;
+        this.canvas = document.createElement('canvas');
+        let { tileWidth } = param
+        this.canvas.width = pixelSize * tileWidth;
+        this.canvas.height = pixelSize * tileWidth;
         this.context = this.canvas.getContext('2d');
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        document.getElementById("simulContainer").appendChild(this.canvas);
         createMap();
         presetHumans();
         createSimul();
@@ -28,7 +183,6 @@ const world = {
     clear: function () {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
-    tileWidth: null,
     tiles: [], //properties and location
     humans: [],
     origins: {
@@ -62,7 +216,8 @@ function createWorld(wd, data) {
         rowData[i] = rowData[i].split('\t')
     }
     console.log(Date.now() - time);
-    let { canvas, tileWidth, tiles, humans, context } = wd;
+    let { canvas, tiles, humans, context } = wd;
+    let { tileWidth, humansPerHouseHold } = param;
     for (let i = 0; i < canvas.width / tileWidth; i++) {
         let tempTileRow = [];
         let walkableRow = [];
@@ -74,11 +229,11 @@ function createWorld(wd, data) {
             switch (num) {
                 case 0: color = "#d1f797"; walkable = false; break;
                 case 1: color = "black"; tileType = "road"; break;
-                case 2: color = "#0044ff"; tileType = "houses"; break;
-                case 3: color = "#ff006a"; tileType = "hospitals"; break;
+                case 2: color = "#734000"; tileType = "houses"; break;
+                case 3: color = "#b0db09"; tileType = "hospitals"; break;
                 case 4: color = "#15bd3c"; tileType = "parks"; break;
-                case 5: color = "#ff6a00"; tileType = "restaurants"; break;
-                case 6: color = "#9700fc"; tileType = "groceries"; break;
+                case 5: color = "#a3271c"; tileType = "restaurants"; break;
+                case 6: color = "#580075"; tileType = "groceries"; break;
             }
 
             rowData[j][i].indexOf('o') !== -1 ? (wd.origins[tileType].push({ x: i, y: j })) : null;
@@ -86,7 +241,7 @@ function createWorld(wd, data) {
                 num: num,
                 component: new component(tileWidth, tileWidth, color, i * tileWidth, j * tileWidth, true),
                 isRoad: false,
-                human: null,
+                humans: [],
             });
             walkableRow.push(walkable === false ? 0 : 1);
         }
@@ -94,7 +249,7 @@ function createWorld(wd, data) {
         wd.walkableTiles.push(walkableRow);
     }
 
-    savedMap = context.getImageData(0, 0, mapSize, mapSize);
+    savedMap = context.getImageData(0, 0, pixelSize * tileWidth, pixelSize * tileWidth);
 
     //create world layout
 
@@ -114,11 +269,10 @@ function createWorld(wd, data) {
                 coronaState: {
                     has: false,
                     carrying: false,
-                    asymptomatic: null,
+                    asymptomatic: false,
                 },
                 atHome: true,
                 age: null,
-                mask: null,
                 curPath: [],
                 dayTasks: []
             })
@@ -129,7 +283,10 @@ function createWorld(wd, data) {
 
 function presetHumans() {
     let { humans } = world;
-    //put human on map
+    let { humansPerHouseHold } = param;
+    let infHumanIndex = Math.floor(numHouses * humansPerHouseHold * Math.random());
+    humans[infHumanIndex].coronaState.has = true;
+    humans[infHumanIndex].coronaState.asymptomatic = true;
 }
 
 
@@ -147,29 +304,13 @@ function component(width, height, color, x, y, instantUpdate) {
     instantUpdate ? this.update() : null;
 }
 
-let totTime, maxTime;
-let param = {
-    tRate: 0.7,
-    tRateMask: 0.2,
-    asympRate: 0.8,
-    tRateLoss: 3,
-    airflow: 0.5,
-    pGroc: 4 / 7,
-    pRes: 5 / 7,
-    pPark: 6 / 7,
-    curfM: 7,
-    curfN: 21
-}
-let pfCalled = fsCalled = qfCalled = rtCalled = mhCalled = atCalled = spCalled = stCalled = rsCalled = 0;
+let totTime, maxTime, returnTime;
+returnTime = 2;
 
-world.start();
-
-
-
+let continueQueue = true;
 
 
 function pathFind(grid, humanObj, target) {
-    pfCalled++;
     //let { graph } = world;
     let graph = new Graph(world.walkableTiles);
     let start = graph.grid[humanObj.curCoords.x][humanObj.curCoords.y];
@@ -184,7 +325,6 @@ function pathFind(grid, humanObj, target) {
 }
 
 function findShortest(origin, finalCoords) {
-    fsCalled++;
     let len = Math.ceil(pixelSize * Math.sqrt(2));
     let shortest;
     for (let i = 0; i < finalCoords.length; i++) {
@@ -196,18 +336,16 @@ function findShortest(origin, finalCoords) {
 }
 
 function quadFormula(x1, y1, x2, y2) {
-    qfCalled++;
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
 function randTest(perc) {
-    rtCalled++;
     return Math.random() < perc;
 }
 
 function moveHuman(human, per) {
-    mhCalled++;
-    world.tiles[human.curCoords.x][human.curCoords.y].human = null;
+    world.tiles[human.curCoords.x][human.curCoords.y].humans = [];
+    let { washingHands } = param;
     let { curTask } = human;
     if (curTask === "none") {
         assignTask(human, per);
@@ -220,9 +358,9 @@ function moveHuman(human, per) {
         let deltX = 0;
         let deltY = 0;
         for (i = 0; i < transfArr.length; i++) {
-            let tempX = transfArr[i][0]
-            let tempY = transfArr[i][1]
-            if (cur === world.tiles[human.curCoords.x + tempX][human.curCoords.y + tempY].num) {
+            let tempX = transfArr[i][0];
+            let tempY = transfArr[i][1];
+            if (world.tiles[human.curCoords.x + tempX] != null && world.tiles != null && cur === world.tiles[human.curCoords.x + tempX][human.curCoords.y + tempY].num) {
                 deltX = tempX;
                 deltY = tempY;
                 break;
@@ -239,16 +377,25 @@ function moveHuman(human, per) {
         //if (curTask === "goHome") { console.log(human, human.curPath[0]); }
         human.curCoords = human.curPath[0];
         human.curPath.shift();
-        human.curPath.length === 0 ? curTask === "goHomeF" ? human.curTask = "wanderF" : human.curTask = "none" : null;
-    }
-    //console.log(human.curCoords);
+        if (human.curPath.length === 0) {
+            if (curTask === "goHomeF") {
+                human.coronaState.carrying && washingHands ? (human.coronaState.carrying = false) : null;
+                human.curTask = "wanderF"
+            } else if (curTask === "hospitals") {
+                world.humans.splice(world.humans.indexOf(human), 1);
+            } else {
+                curTask === "goHome" && human.coronaState.carrying && washingHands ? (human.coronaState.carrying = false) : null;
+                human.curTask = "none"
+            }
 
-    world.tiles[human.curCoords.x][human.curCoords.y].human = human;
+        }
+    }
+
+    world.tiles[human.curCoords.x][human.curCoords.y].humans.push(human);
     human.atHome ? world.tiles[human.curCoords.x][human.curCoords.y].num !== 2 ? human.atHome = false : null : world.tiles[human.curCoords.x][human.curCoords.y].num === 2 ? human.atHome = true : null;
 }
 
 function assignTask(human, per) {
-    atCalled++;
     let len = human.dayTasks.length;
     let perc = len * per;
     if (len === 0) {
@@ -258,7 +405,6 @@ function assignTask(human, per) {
 }
 
 function setPath(human, task) {
-    spCalled++;
     let { walkableTiles } = world;
     if (task === "goHome" || task === "goHomeF") {
         human.atHome ? human.curTask = "none" : pathFind(walkableTiles, human, human.originCoords);
@@ -271,7 +417,6 @@ function setPath(human, task) {
 }
 
 function setTasks(humans) {
-    stCalled++;
     let { pGroc, pRes, pPark } = param;
     humans.forEach(h => {
         let temp = [];
@@ -287,7 +432,6 @@ function setTasks(humans) {
 
 //Fisher Yates
 function randSort(arr) {
-    rsCalled++;
     let ind = arr.length
     let temp, rInd;
     while (0 !== ind) {
@@ -301,44 +445,106 @@ function randSort(arr) {
 }
 
 function infect(human) {
+    let { coronaState, curCoords } = human;
+    let { tRate, maskDegrade, asympRate, mask, carryToInf } = param;
+    if (coronaState.has) {
+        return;
+    } else if (coronaState.carrying === true) {
+        randTest(carryToInf) ? (
+            coronaState.carrying = false,
+            coronaState.has = true,
+            coronaState.asymptomatic = randTest(asympRate),
+            coronaState.asymptomatic ? null : (
+                human.curTask = "hospitals",
+                setPath(human, human.curTask)
+            ),
+            curInfected++
+        ) : null;
+    } else {
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                let tempCoordx = curCoords.x + i;
+                let tempCoordy = curCoords.y + j;
+                if (!(tempCoordx < 0 || tempCoordx >= pixelSize || tempCoordy < 0 || tempCoordy >= pixelSize || world.tiles[tempCoordx][tempCoordy].num !== world.tiles[curCoords.x][curCoords.y].num)) {
+                    let tempRate;
+                    mask ? tempRate = tRate * maskDegrade : tempRate = tRate;
+                    //console.log(tempRate);
+                    world.tiles[tempCoordx][tempCoordy].humans.forEach(h => {
+                        if ((h.coronaState.has || h.coronaState.carrying) && randTest(tempRate)) {
+                            coronaState.carrying = true;
+                        }
+                    })
+
+                }
+            }
+        }
+    }
 
 }
 
 function createSimul() {
     //human movement
-    let { tRate, tRateMask, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN } = param;
-    let infCount = 0;
+    let { tRate, maskDegrade, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN, humansPerHouseHold } = param;
     totTime = 0;
     let dayTime = 0;
     let ceilTime = (curfN - curfM) * 3600 / frameTime
-    maxTime = (curfN - curfM + Math.ceil(pixelSize * 2 * frameTime / 3600)) * 3600 / frameTime;
+    maxTime = (curfN - curfM + Math.ceil(pixelSize * returnTime * frameTime / 3600)) * 3600 / frameTime;
 
     //while (infCount < numHouses * humansPerHouseHold) {
 
     async function queueScene() {
-        makeScene(dayTime, ceilTime, maxTime).then(s => {
-            scenes.push(s); setTimeout(() => {
-                dayTime++;
-                dayTime === maxTime ? (dayTime = 0) : null;
-                queueScene();
-            }, 1);
+        makeScene(dayTime, ceilTime, maxTime, batchId).then(s => {
+            if (curInfected < numHouses * humansPerHouseHold && s.id === batchId) {
+                scenes.push(s.scene);
+                setTimeout(() => {
+                    dayTime++;
+                    dayTime === maxTime ? (dayTime = 0) : null;
+                    continueQueue ? queueScene() : null;
+                }, 1);
+            }
         })
     }
 
 
 
-    let makeScene = async (dayTime, ceilTime, maxTime) => {
+    let makeScene = async (dayTime, ceilTime, maxTime, bid) => {
         dayTime === 0 ? setTasks(world.humans) : null;
         //if hour is 10pm or more, human should be returning to origin
         //console.log(JSON.parse(JSON.stringify(world.humans)))
         let scene = [];
-        dayTime === ceilTime ? world.humans.forEach(h => { moveHuman(h, dayTime / maxTime); h.curTask = "goHomeF"; setPath(h, "goHomeF"); scene.push(Object.assign({}, h.curCoords)) }) : world.humans.forEach(h => { moveHuman(h, dayTime / maxTime); scene.push(Object.assign({}, h.curCoords)); });
+        dayTime === ceilTime ? world.humans.forEach(h => {
+            moveHuman(h, dayTime / maxTime);
+            h.curTask = "goHomeF";
+            setPath(h, "goHomeF");
+
+            scene.push(createSceneHuman(h));
+        }) : world.humans.forEach(h => {
+            moveHuman(h, dayTime / maxTime);
+            scene.push(createSceneHuman(h));
+        });
+
+        function createSceneHuman(h) {
+            let tempHumanSc = {};
+            Object.assign(tempHumanSc, h.curCoords);
+            if (h.coronaState.has) {
+                if (h.coronaState.asymptomatic) {
+                    tempHumanSc.coronaState = "HA"
+                } else {
+                    tempHumanSc.coronaState = "HX"
+                }
+            } else if (h.coronaState.carrying) {
+                tempHumanSc.coronaState = "C"
+            } else {
+                tempHumanSc.coronaState = "N"
+            }
+            return tempHumanSc;
+        }
 
         loadStateSubElem.textContent = scenes.length;
         //world.humans.forEach(h => { scene.push(JSON.parse(JSON.stringify(h.curCoords))) });
         //world.humans.forEach(h => { scene.push(Object.assign({}, h.curCoords)) });
-
-        return scene;
+        world.humans.forEach(h => infect(h));
+        return { scene: scene, id: bid };
     }
     queueScene();
 
@@ -385,12 +591,23 @@ function createSimul() {
 
 
 
+let viewInterval = null;
+const playSimulElem = document.querySelector("#playSimul");
+const pauseSimulElem = document.querySelector("#pauseSimul");
+const pauseQueueElem = document.querySelector("#pauseQueue");
+const fasterSimulElem = document.querySelector("#fasterSimul");
+const slowerSimulElem = document.querySelector("#slowerSimul");
+const simulSpeedFPSElem = document.querySelector("#simulSpeedFPS");
+const simulSpeedTimeElem = document.querySelector("#simulSpeedTime");
 
-
-const intervalTime = 100;
+let intervalTime = 100;
 let curSceneNum = 0;
-
+let saveFPSTime;
 let updateWorld = () => {
+    let { tileWidth, curfM, curfN } = param;
+    simulSpeedTimeElem.textContent = `1 Scene per ${intervalTime} ms`
+    saveFPSTime != null ? simulSpeedFPSElem.textContent = `${Math.round(1000 / (Date.now() - saveFPSTime))} fps` : null
+    saveFPSTime = Date.now();
     if (scenes.length < curSceneNum + 1) {
         viewInterval !== null ? (clearInterval(viewInterval), viewInterval = null) : null;
         return;
@@ -398,31 +615,69 @@ let updateWorld = () => {
     world.clear();
     world.context.putImageData(savedMap, 0, 0);
     scenes[curSceneNum].forEach(c => {
-        new component(world.tileWidth, world.tileWidth, "white", c.x * world.tileWidth, c.y * world.tileWidth, true)
+        let tempColor;
+        switch (c.coronaState) {
+            case "HA": tempColor = "#fb00ff"; break;
+            case "HX": tempColor = "red"; break;
+            case "C": tempColor = "#ffa100"; break;
+            case "N": tempColor = "white"; break;
+            default: tempColor = "white"
+        }
+        new component(tileWidth, tileWidth, tempColor, c.x * tileWidth, c.y * tileWidth, true)
     })
-    numElem.textContent = curSceneNum;
+    let tempFullTime = curSceneNum * frameTime;
+    tempFullTime = Math.floor(tempFullTime / 60);
+    let tempMin = tempFullTime % 60;
+    tempFullTime = Math.floor(tempFullTime / 60);
+    let tempHr = tempFullTime % (curfN - curfM + returnTime) + curfM;
+    tempFullTime = Math.floor(tempFullTime / (curfN - curfM + returnTime));
+    let tempDay = tempFullTime;
+
+
+
+    numElem.textContent = `${tempDay} Days ${tempHr < 10 ? "0" + tempHr : tempHr}${tempMin < 10 ? "0" + tempMin : tempMin} Military Time`;
 
     curSceneNum++;
 
+    //simulSpeedElem.textContent = "0 fps"
 
-
-
-
-
-
-    //updating function
 
 }
 
-let viewInterval = null;
-const playSimulElem = document.querySelector("#playSimul");
-const pauseSimulElem = document.querySelector("#pauseSimul");
+
+
+
 
 playSimulElem.addEventListener("click", () => {
-    viewInterval === null ? viewInterval = setInterval(updateWorld, intervalTime) : null;
+    viewInterval === null ? startSceneIntervals() : null;
 })
 
 pauseSimulElem.addEventListener("click", () => {
-    viewInterval !== null ? clearInterval(viewInterval) : null
+    viewInterval !== null ? clearSceneIntervals() : null;
     viewInterval = null;
 })
+
+pauseQueueElem.addEventListener("click", () => {
+    continueQueue = false;
+})
+
+fasterSimulElem.addEventListener("click", () => {
+    intervalTime -= 10;
+    intervalTime < 10 ? intervalTime = 10 : null;
+    clearSceneIntervals();
+    startSceneIntervals();
+})
+
+slowerSimulElem.addEventListener("click", () => {
+    intervalTime += 10;
+    clearSceneIntervals();
+    startSceneIntervals();
+})
+
+function clearSceneIntervals() {
+    viewInterval !== null ? clearInterval(viewInterval) : null;
+}
+
+function startSceneIntervals() {
+    viewInterval = setInterval(updateWorld, intervalTime);
+}

@@ -1,3 +1,11 @@
-body{
-    margin:0;
+body {
+    margin: 0;
+}
+
+.gray-back-light {
+    background-color: #d9d9d9;
+}
+
+.turq-back-light {
+    background-color: #a3f3ff;
 }
