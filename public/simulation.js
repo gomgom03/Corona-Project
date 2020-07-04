@@ -715,7 +715,19 @@ let scatterChart = new Chart(chartCanvasCtx, {
         scales: {
             xAxes: [{
                 type: 'linear',
-                position: 'bottom'
+                position: 'bottom',
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Time (Minutes)'
+                }
+            }],
+            yAxes: [{
+                type: 'linear',
+                position: 'bottom',
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Infected Population (%)'
+                }
             }]
         }
     }
