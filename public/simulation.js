@@ -28,6 +28,7 @@ let param = {
     mask: false,
     carryToInf: 0.005,
     washingHands: true,
+    chartIncrement: 1
 }
 
 $('#popupModal').modal({ show: false })
@@ -63,6 +64,7 @@ defaultSimulStartElem.addEventListener("click", () => {
         mask: false,
         carryToInf: 0.005,
         washingHands: true,
+        chartIncrement: 1
     }
     endConfig();
 })
@@ -84,6 +86,7 @@ configSimulStartElem.addEventListener("click", () => {
         mask: false,
         carryToInf: 0.005,
         washingHands: true,
+        chartIncrement: 5
     }
     let errMessage = "";
     let tempObj = {}
@@ -164,6 +167,8 @@ function resetAll() {
     intervalTime = 100;
     curSceneNum = 0;
     clearSceneIntervals();
+    viewInterval = null;
+    totTime = 0;
 }
 
 
@@ -458,7 +463,9 @@ function infect(human) {
                 human.curTask = "hospitals",
                 setPath(human, human.curTask)
             ),
-            curInfected++
+            curInfected++,
+            addScatter()
+
         ) : null;
     } else {
         for (let i = -1; i <= 1; i++) {
@@ -470,7 +477,7 @@ function infect(human) {
                     mask ? tempRate = tRate * maskDegrade : tempRate = tRate;
                     //console.log(tempRate);
                     world.tiles[tempCoordx][tempCoordy].humans.forEach(h => {
-                        if ((h.coronaState.has || h.coronaState.carrying) && randTest(tempRate)) {
+                        if ((h.coronaState.has) && randTest(tempRate)) {
                             coronaState.carrying = true;
                         }
                     })
@@ -497,6 +504,7 @@ function createSimul() {
             if (curInfected < numHouses * humansPerHouseHold && s.id === batchId) {
                 scenes.push(s.scene);
                 setTimeout(() => {
+                    totTime++;
                     dayTime++;
                     dayTime === maxTime ? (dayTime = 0) : null;
                     continueQueue ? queueScene() : null;
@@ -635,7 +643,7 @@ let updateWorld = () => {
 
 
 
-    numElem.textContent = `${tempDay} Days ${tempHr < 10 ? "0" + tempHr : tempHr}${tempMin < 10 ? "0" + tempMin : tempMin} Military Time`;
+    numElem.textContent = `Day ${tempDay}, ${tempHr < 10 ? "0" + tempHr : tempHr}:${tempMin < 10 ? "0" + tempMin : tempMin}`;
 
     curSceneNum++;
 
@@ -681,3 +689,43 @@ function clearSceneIntervals() {
 function startSceneIntervals() {
     viewInterval = setInterval(updateWorld, intervalTime);
 }
+
+
+
+
+//GRAPH AND COPYABLE DATA
+
+const chartCanvasElem = document.getElementById("chartCanvas"),
+    chartCanvasCtx = chartCanvasElem.getContext("2d");
+
+let scatterChart = new Chart(chartCanvasCtx, {
+    type: 'scatter',
+    data: {
+        datasets: [{
+            label: 'Scatter Dataset',
+            borderColor: "#ff0800",
+            backgroundColor: "#ffb2b0",
+            data: [{
+                x: 0,
+                y: curInfected
+            }]
+        }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                type: 'linear',
+                position: 'bottom'
+            }]
+        }
+    }
+});
+
+function addScatter() {
+    let { humansPerHouseHold, chartIncrement, curfM, curfN } = param;
+    curInfected / humansPerHouseHold % chartIncrement === 0 ? (
+        scatterChart.data.datasets[0].data.push({ y: curInfected / humansPerHouseHold, x: frameTime * totTime / 60 }),// + (24 - returnTime - curfN + curfM) * 60 }),
+        scatterChart.update()
+    ) : null
+}
+

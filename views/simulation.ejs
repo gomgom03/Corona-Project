@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/javascript-astar/0.4.1/astar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
 </head>
 
 <body class="m-0">
@@ -75,7 +76,7 @@
 
         </div>
     </nav>
-    <div class="container bg-light">
+    <div class="container bg-white">
         <div class="container gray-back-light text-black rounded mt-3 mb-3 pb-3 pt-3 in text-center">
 
             <div class="d-flex justify-content-center mb-1 mt-2">
@@ -239,7 +240,7 @@
         </button>
     </div>
 
-    <div class="container bg-light text-center">
+    <div class="container bg-light text-center rounded">
         <div class="d-flex justify-content-center" id="simulContainer"></div>
         <h3 id="num">Time</h3>
         <button class="btn btn-light border" id="playSimul">Play</button>
@@ -254,56 +255,9 @@
         <button class="btn btn-danger" id="pauseQueue">Pause Queue</button>
 
         <div class="container" id="dataLog"></div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">25%</th>
-                    <th scope="col">50%</th>
-                    <th scope="col">75%</th>
-                    <th scope="col">100%</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-
-            </tbody>
-        </table>
+        <div class="container">
+            <canvas id="chartCanvas"></canvas>
+        </div>
     </div>
 
 
