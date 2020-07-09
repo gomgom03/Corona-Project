@@ -18,3 +18,7 @@ app.get('/', (req, res) => {
 app.get('/simulation', (req, res) => {
     res.render("simulation.ejs");
 })
+
+app.get('/test', (req, res) => {
+    res.render("test.ejs");
+})

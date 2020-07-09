@@ -1,3 +1,4 @@
+/*
 var graph = new Graph([
     [1, 1, 1, 1],
     [0, 1, 1, 0],
@@ -25,3 +26,4 @@ var graphWithWeight = new Graph([
 var startWithWeight = graphWithWeight.grid[0][0];
 var endWithWeight = graphWithWeight.grid[1][2];
 var resultWithWeight = astar.search(graphWithWeight, startWithWeight, endWithWeight);
+*/

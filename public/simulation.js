@@ -4,7 +4,7 @@ let time = Date.now();
 const pixelSize = 250
 let savedMap = null;
 let scenes = [];
-const numHouses = 100;
+let numHouses;
 const frameTime = 10;
 const numElem = document.getElementById("num");
 const loadStateSubElem = document.querySelector("#loadStateSub");
@@ -12,24 +12,30 @@ const spinnerElem = document.getElementById("spinner")
 let curInfected = 1;
 let batchId = null;
 let endConfigResolved = true;
-let param = {
+let curLoopIndex = 0;
+
+let paramBase = {
     tileWidth: 3,
     humansPerHouseHold: 2,
     tRate: 0.4,
-    maskDegrade: 0.2,
+    maskDegrade: 0.05,
     asympRate: 0.8,
     tRateLoss: 3,
     airflow: 0.5,
-    pGroc: 4 / 7,
-    pRes: 5 / 7,
-    pPark: 6 / 7,
+    pGroc: 3 / 7,
+    pRes: 2 / 7,
+    pPark: 4 / 7,
     curfM: 7,
     curfN: 21,
     mask: false,
-    carryToInf: 0.005,
-    washingHands: true,
-    chartIncrement: 1
+    carryToInf: 0.05,
+    washingHands: false,
+    chartIncrement: 120,
+    avoidNonessential: false,
+    loopTimes: 1
 }
+
+let param = {}
 
 $('#popupModal').modal({ show: false })
 
@@ -48,46 +54,14 @@ const defaultSimulStartElem = document.getElementById("defaultSimulStart"),
 
 
 defaultSimulStartElem.addEventListener("click", () => {
-    param = {
-        tileWidth: 3,
-        humansPerHouseHold: 2,
-        tRate: 0.4,
-        maskDegrade: 0.2,
-        asympRate: 0.8,
-        tRateLoss: 3,
-        airflow: 0.5,
-        pGroc: 4 / 7,
-        pRes: 5 / 7,
-        pPark: 6 / 7,
-        curfM: 7,
-        curfN: 21,
-        mask: false,
-        carryToInf: 0.005,
-        washingHands: true,
-        chartIncrement: 1
-    }
+    param = { ...paramBase };
+    curLoopIndex = 0;
     endConfig();
 })
 
 configSimulStartElem.addEventListener("click", () => {
-    param = {
-        tileWidth: 3,
-        humansPerHouseHold: 2,
-        tRate: 0.4,
-        maskDegrade: 0.2,
-        asympRate: 0.8,
-        tRateLoss: 3,
-        airflow: 0.5,
-        pGroc: 4 / 7,
-        pRes: 5 / 7,
-        pPark: 6 / 7,
-        curfM: 7,
-        curfN: 21,
-        mask: false,
-        carryToInf: 0.005,
-        washingHands: true,
-        chartIncrement: 5
-    }
+    param = { ...paramBase };
+    curLoopIndex = 0;
     let errMessage = "";
     let tempObj = {}
     configPartsElems.forEach(el => {
@@ -97,6 +71,7 @@ configSimulStartElem.addEventListener("click", () => {
             value === "e" || value === "E" ? val = Math.E : null;
             switch (id) {
                 case "tileWidth": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Tile Width> should be a positive integer. "; break;
+                case "chartIncrement": val >= 1 && Math.floor(val) === val ? tempObj[id] = val * 6 : errMessage += "<Chart Increment> should be a positive integer. "; break;
                 case "humansPerHouseHold": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Humans Per Household> should be a positive integer. "; break;
                 case "tRate": val <= 100 && val > 0 ? tempObj[id] = val / 100 : errMessage += "<Probability of Transmission> should be greater than 0 and at most 100. "; break;
                 case "maskDegrade": val <= 100 && val >= 0 ? tempObj[id] = (100 - val) / 100 : errMessage += "<Mask Rating> should be at least 0 and at most 100. "; break;
@@ -107,13 +82,14 @@ configSimulStartElem.addEventListener("click", () => {
                 case "pRes": val <= 100 && val >= 0 ? tempObj[id] = val / 100 : errMessage += "<Probability of Going to a Restaurant on a Given Day> should be at least 0 and at most 100. "; break;
                 case "mask": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
                 case "washingHands": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
+                case "avoidNonessential": val === 1 ? (tempObj[id] = true, tempObj.pRes = 0, tempObj.pPark = 0) : tempObj[id] = false; break;
                 case "curfM": val <= 12 && val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Start of Day> should be an integer at least 1 and at most 12. "; break;
                 case "curfN": val <= 22 && val >= 13 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Curfew> should be an integer at least 13 and at most 22. "; break;
+                case "loopTimes": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Loop Times> should be a positive integer. "; break;
                 default:
                     errMessage += "Internal Error";
 
             }
-            tempObj[el.id] = val;
         }
     });
     if (errMessage === "") {
@@ -131,6 +107,7 @@ configSimulStartElem.addEventListener("click", () => {
 
 function endConfig() {
     if (endConfigResolved) {
+        curLoopIndex++;
         endConfigResolved = false;
         continueQueue = false;
         spinnerElem.className = "d-flex justify-content-center";
@@ -141,6 +118,8 @@ function endConfig() {
             endConfigResolved = true;
             spinnerElem.className = "d-none";
             configOptionsElem.className === "collapse show" ? configOptionButtonElem.click() : null;
+            chartData.datasetIndex++;
+            chartData.createNewDataset(scatterChart.data.datasets);
         }, 1000)
     }
 }
@@ -179,7 +158,7 @@ const world = {
         let { tileWidth } = param
         this.canvas.width = pixelSize * tileWidth;
         this.canvas.height = pixelSize * tileWidth;
-        this.context = this.canvas.getContext('2d');
+        this.context = this.canvas.getContext('2d', { alpha: false });
         document.getElementById("simulContainer").appendChild(this.canvas);
         createMap();
         presetHumans();
@@ -253,7 +232,7 @@ function createWorld(wd, data) {
         wd.tiles.push(tempTileRow);
         wd.walkableTiles.push(walkableRow);
     }
-
+    numHouses = world.origins.houses.length;
     savedMap = context.getImageData(0, 0, pixelSize * tileWidth, pixelSize * tileWidth);
 
     //create world layout
@@ -328,6 +307,12 @@ function pathFind(grid, humanObj, target) {
     //usefulInfo.length === 0 ? console.log(JSON.parse(JSON.stringify(grid)), JSON.parse(JSON.stringify(humanObj)), JSON.parse(JSON.stringify(target))) : null
     usefulInfo.length !== 0 ? humanObj.curPath = usefulInfo : humanObj.curTask === "goHomeF" ? humanObj.curTask = "wanderF" : humanObj.curTask = "none";
 }
+
+
+
+
+
+
 
 function findShortest(origin, finalCoords) {
     let len = Math.ceil(pixelSize * Math.sqrt(2));
@@ -463,8 +448,7 @@ function infect(human) {
                 human.curTask = "hospitals",
                 setPath(human, human.curTask)
             ),
-            curInfected++,
-            addScatter()
+            curInfected++
 
         ) : null;
     } else {
@@ -491,7 +475,7 @@ function infect(human) {
 
 function createSimul() {
     //human movement
-    let { tRate, maskDegrade, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN, humansPerHouseHold } = param;
+    let { tRate, maskDegrade, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN, humansPerHouseHold, loopTimes } = param;
     totTime = 0;
     let dayTime = 0;
     let ceilTime = (curfN - curfM) * 3600 / frameTime
@@ -503,12 +487,18 @@ function createSimul() {
         makeScene(dayTime, ceilTime, maxTime, batchId).then(s => {
             if (curInfected < numHouses * humansPerHouseHold && s.id === batchId) {
                 scenes.push(s.scene);
+
+                addScatter();
                 setTimeout(() => {
                     totTime++;
                     dayTime++;
                     dayTime === maxTime ? (dayTime = 0) : null;
                     continueQueue ? queueScene() : null;
                 }, 1);
+            } else {
+                addScatter(true);
+                console.log(curLoopIndex, loopTimes);
+                curLoopIndex < loopTimes ? endConfig() : null;
             }
         })
     }
@@ -696,20 +686,33 @@ function startSceneIntervals() {
 //GRAPH AND COPYABLE DATA
 
 const chartCanvasElem = document.getElementById("chartCanvas"),
-    chartCanvasCtx = chartCanvasElem.getContext("2d");
+    chartCanvasCtx = chartCanvasElem.getContext("2d"),
+    copyableDataElem = document.getElementById("copyableData"),
+    copyDataElem = document.getElementById("copyData");
+
+copyDataElem.addEventListener("click", () => {
+    let tempText = "x";
+    for (let i = 0; i < chartData.datasetIndex + 1; i++) {
+        tempText += `\tDataset ${i + 1}`
+    }
+    tempText += "\n"
+    for (let key in chartData.dataText) {
+        tempText += `${key}\t`
+        for (let i = 0; i < chartData.dataText[key].length; i++) {
+            tempText += `${chartData.dataText[key][i] || ""}\t`
+        }
+        tempText += "\n"
+    }
+    copyableDataElem.value = tempText;
+    copyableDataElem.select();
+    document.execCommand("copy") ? popupMessage("Success!", "You have successfully copied the data to your clipboard.") : popupMessage("Failure.", "Unable to copy data to clipboard. Check if you have data.");
+})
+
 
 let scatterChart = new Chart(chartCanvasCtx, {
     type: 'scatter',
     data: {
-        datasets: [{
-            label: 'Scatter Dataset',
-            borderColor: "#ff0800",
-            backgroundColor: "#ffb2b0",
-            data: [{
-                x: 0,
-                y: curInfected
-            }]
-        }]
+        datasets: []
     },
     options: {
         scales: {
@@ -733,11 +736,50 @@ let scatterChart = new Chart(chartCanvasCtx, {
     }
 });
 
-function addScatter() {
+const chartData = {
+    datasetIndex: -1,
+    dataText: {
+
+    },
+    generateColor: function () {
+        return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+    },
+    darkenColor: function (clr) {
+        let temp = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(clr);
+        let rClr = parseInt(temp[1], 16)
+        let gClr = parseInt(temp[2], 16)
+        let bClr = parseInt(temp[3], 16)
+        function partHexDark(part) {
+            let hex = (Math.round(part * 0.5)).toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+        function makeHex(r, g, b) {
+            return "#" + partHexDark(r) + partHexDark(g) + partHexDark(b);
+        }
+        return makeHex(rClr, gClr, bClr);
+    },
+    createNewDataset: function (datasets) {
+        let { humansPerHouseHold } = param
+        let tClr = this.generateColor();
+        let tClrD = this.darkenColor(tClr);
+        datasets.push({
+            label: `Dataset ${this.datasetIndex + 1}`,
+            borderColor: tClrD,
+            backgroundColor: tClr,
+            data: [{ x: 0, y: curInfected / humansPerHouseHold / numHouses * 100 }]
+        })
+    }
+}
+
+function addScatter(force = false) {
     let { humansPerHouseHold, chartIncrement, curfM, curfN } = param;
-    curInfected / humansPerHouseHold % chartIncrement === 0 ? (
-        scatterChart.data.datasets[0].data.push({ y: curInfected / humansPerHouseHold, x: frameTime * totTime / 60 }),// + (24 - returnTime - curfN + curfM) * 60 }),
-        scatterChart.update()
+    let tempX = frameTime * totTime / 60
+    let tempY = curInfected / humansPerHouseHold / numHouses * 100;
+    force || totTime % chartIncrement === 0 ? (
+        scatterChart.data.datasets[chartData.datasetIndex].data.push({ y: tempY, x: tempX }),// + (24 - returnTime - curfN + curfM) * 60 }),
+        scatterChart.update(),
+        chartData.dataText[tempX] == null ? chartData.dataText[tempX] = [] : null,
+        chartData.dataText[tempX][chartData.datasetIndex] = tempY
     ) : null
 }
 
