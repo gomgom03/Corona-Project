@@ -742,7 +742,7 @@ const chartData = {
 
     },
     generateColor: function () {
-        return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+        return '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
     },
     darkenColor: function (clr) {
         let temp = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(clr);
@@ -761,6 +761,7 @@ const chartData = {
     createNewDataset: function (datasets) {
         let { humansPerHouseHold } = param
         let tClr = this.generateColor();
+        console.log(tClr)
         let tClrD = this.darkenColor(tClr);
         datasets.push({
             label: `Dataset ${this.datasetIndex + 1}`,
