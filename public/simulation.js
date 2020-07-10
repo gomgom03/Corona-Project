@@ -153,6 +153,7 @@ function resetAll() {
     clearSceneIntervals();
     viewInterval = null;
     totTime = 0;
+    numScenes = 0;
 }
 
 
