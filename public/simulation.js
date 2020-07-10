@@ -490,7 +490,7 @@ function createSimul() {
 
     async function queueScene() {
         makeScene(dayTime, ceilTime, maxTime, batchId).then(s => {
-            if (curInfected < numHouses * humansPerHouseHold && s.id === batchId && (upperBound && 14 * (curfN - curfM + 2) * 60 * 6 > numScenes)) {
+            if (curInfected < numHouses * humansPerHouseHold && s.id === batchId && ((upperBound && 14 * (curfN - curfM + 2) * 60 * 6 > numScenes) || !upperBound)) {
                 saveScenes ? scenes.push(s.scene) : null;
                 numScenes++;
                 addScatter();
