@@ -34,7 +34,8 @@ let paramBase = {
     chartIncrement: 120,
     avoidNonessential: false,
     loopTimes: 1,
-    saveScenes: false
+    saveScenes: false,
+    upperBound: false,
 }
 
 let param = {}
@@ -89,6 +90,7 @@ configSimulStartElem.addEventListener("click", () => {
                 case "curfN": val <= 22 && val >= 13 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Curfew> should be an integer at least 13 and at most 22. "; break;
                 case "loopTimes": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Loop Times> should be a positive integer. "; break;
                 case "saveScenes": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
+                case "upperBound": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
                 default:
                     errMessage += "Internal Error";
 
@@ -478,7 +480,7 @@ function infect(human) {
 
 function createSimul() {
     //human movement
-    let { tRate, maskDegrade, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN, humansPerHouseHold, loopTimes, saveScenes } = param;
+    let { tRate, maskDegrade, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN, humansPerHouseHold, loopTimes, saveScenes, upperBound } = param;
     totTime = 0;
     let dayTime = 0;
     let ceilTime = (curfN - curfM) * 3600 / frameTime
@@ -488,7 +490,7 @@ function createSimul() {
 
     async function queueScene() {
         makeScene(dayTime, ceilTime, maxTime, batchId).then(s => {
-            if (curInfected < numHouses * humansPerHouseHold && s.id === batchId) {
+            if (curInfected < numHouses * humansPerHouseHold && s.id === batchId && (upperBound && 14 * (curfN - curfM + 2) * 60 * 6 > numScenes)) {
                 saveScenes ? scenes.push(s.scene) : null;
                 numScenes++;
                 addScatter();
