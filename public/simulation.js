@@ -13,6 +13,7 @@ let curInfected = 1;
 let batchId = null;
 let endConfigResolved = true;
 let curLoopIndex = 0;
+let numScenes = 0;
 
 let paramBase = {
     tileWidth: 3,
@@ -489,7 +490,7 @@ function createSimul() {
         makeScene(dayTime, ceilTime, maxTime, batchId).then(s => {
             if (curInfected < numHouses * humansPerHouseHold && s.id === batchId) {
                 saveScenes ? scenes.push(s.scene) : null;
-
+                numScenes++;
                 addScatter();
                 setTimeout(() => {
                     totTime++;
@@ -540,7 +541,7 @@ function createSimul() {
             return tempHumanSc;
         }
 
-        loadStateSubElem.textContent = scenes.length;
+        loadStateSubElem.textContent = numScenes;
         //world.humans.forEach(h => { scene.push(JSON.parse(JSON.stringify(h.curCoords))) });
         //world.humans.forEach(h => { scene.push(Object.assign({}, h.curCoords)) });
         world.humans.forEach(h => infect(h));
