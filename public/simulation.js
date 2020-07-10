@@ -32,7 +32,8 @@ let paramBase = {
     washingHands: false,
     chartIncrement: 120,
     avoidNonessential: false,
-    loopTimes: 1
+    loopTimes: 1,
+    saveScenes: false
 }
 
 let param = {}
@@ -86,6 +87,7 @@ configSimulStartElem.addEventListener("click", () => {
                 case "curfM": val <= 12 && val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Start of Day> should be an integer at least 1 and at most 12. "; break;
                 case "curfN": val <= 22 && val >= 13 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Curfew> should be an integer at least 13 and at most 22. "; break;
                 case "loopTimes": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Loop Times> should be a positive integer. "; break;
+                case "saveScenes": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
                 default:
                     errMessage += "Internal Error";
 
@@ -475,7 +477,7 @@ function infect(human) {
 
 function createSimul() {
     //human movement
-    let { tRate, maskDegrade, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN, humansPerHouseHold, loopTimes } = param;
+    let { tRate, maskDegrade, asympRate, tRateLoss, airflow, pGroc, pRes, pPark, curfM, curfN, humansPerHouseHold, loopTimes, saveScenes } = param;
     totTime = 0;
     let dayTime = 0;
     let ceilTime = (curfN - curfM) * 3600 / frameTime
@@ -486,7 +488,7 @@ function createSimul() {
     async function queueScene() {
         makeScene(dayTime, ceilTime, maxTime, batchId).then(s => {
             if (curInfected < numHouses * humansPerHouseHold && s.id === batchId) {
-                scenes.push(s.scene);
+                saveScenes ? scenes.push(s.scene) : null;
 
                 addScatter();
                 setTimeout(() => {
