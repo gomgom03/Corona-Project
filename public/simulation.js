@@ -36,6 +36,7 @@ let paramBase = {
     loopTimes: 1,
     saveScenes: false,
     upperBound: false,
+    map: 1,
 }
 
 let param = {}
@@ -91,6 +92,7 @@ configSimulStartElem.addEventListener("click", () => {
                 case "loopTimes": val >= 1 && Math.floor(val) === val ? tempObj[id] = val : errMessage += "<Loop Times> should be a positive integer. "; break;
                 case "saveScenes": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
                 case "upperBound": val === 1 ? tempObj[id] = true : tempObj[id] = false; break;
+                case "map": tempObj[id] = val; break;
                 default:
                     errMessage += "Internal Error";
 
@@ -187,8 +189,9 @@ const world = {
 }
 
 function createMap() {
+    let { map } = param;
     let rawFile = new XMLHttpRequest();
-    rawFile.open("GET", './map.txt', false);
+    rawFile.open("GET", `./map${map}.txt`, false);
     rawFile.onreadystatechange = function () {
         if (rawFile.readyState === 4) {
             if (rawFile.status === 200 || rawFile.status == 0) {
