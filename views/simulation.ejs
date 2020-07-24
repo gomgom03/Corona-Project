@@ -10,6 +10,7 @@
     <link rel="manifest" href="/icon/site.webmanifest">
     <title>Simulation</title>
     <link rel="stylesheet" href="simulation.css">
+    <link rel="stylesheet" href="basic.css">
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"
         integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
@@ -21,7 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gpu.js@latest/dist/gpu-browser.min.js"></script>
 </head>
 
-<body class="m-0">
+<body class="m-0 bg-info">
 
     <div class="modal fade" id="popupModal" tabindex="-1" role="dialog" aria-labelledby="modal" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -61,7 +62,7 @@
                         <a class="nav-link active" href="/simulation">Simulation</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/about" id="aboutButton">About Us</a>
+                        <a class="nav-link" href="/about" id="aboutButton">About Author</a>
                     </li>
                 </ul>
             </div>
@@ -75,262 +76,439 @@
 
         </div>
     </nav>
-    <div class="container bg-white">
-        <div class="container gray-back-light text-black rounded mt-3 mb-3 pb-3 pt-3 in text-center">
 
-            <div class="d-flex justify-content-center mb-1 mt-2">
-                <button type="button" class="btn btn-primary btn-lg" id="defaultSimulStart">Run Default
-                    Simulation</button>
+    <header class="bg-info text-white">
+        <div class="container text-center pt-2 pb-2">
+            <h1 class="pt-4">Welcome to the simulation page!</h1>
+            <p class="lead pb-1 text-light">Creation of spread simulation and collection of data for analysis</p>
+        </div>
+    </header>
+
+    <div class="bg-light text-black mt-3 pb-3 pt-3 in text-center">
+        <div class="d-flex justify-content-center mb-2 mt-2">
+            <button type="button" class="btn btn-primary btn-lg" id="configSimulStart">Run Simulation</button>
+        </div>
+        <button data-toggle="collapse" data-target="#configOptions" class="btn btn-sm py-0 btn-dark mt-2 mb-2"
+            id="configOptionButton">→ Configuration
+            Options ←</button>
+        <div class="collapse" id="configOptions">
+            <div class="mr-5 ml-5 mb-1 mt-1" id="configInputs">
+                <div class="lead mb-2 mt-2 text-info"><strong><u>Variables for Simulation</u></strong></div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Map</span>
+                    </div>
+                    <select class="form-control configParts" id="map">
+                        <option value="" selected disabled hidden>Choose Option</option>
+                        <option value="1">Map 1 (Default) </option>
+                        <option value="2">Map 2</option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Chart Increment (Do not change between trials)</span>
+                    </div>
+                    <input type=" number" class="form-control configParts" placeholder="Default: 20"
+                        aria-label="pixelSize" aria-describedby="basic-addon1" id="chartIncrement">
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Humans Per Household</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 3" aria-label="hph"
+                        aria-describedby="basic-addon1" id="humansPerHouseHold">
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Mask</span>
+                    </div>
+                    <select class="form-control configParts" id="mask">
+                        <option value="" selected disabled hidden>Choose Option</option>
+                        <option value="1">True</option>
+                        <option value="0">False (Default)</option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Washing Hands After Coming
+                            Home</span>
+                    </div>
+                    <select class="form-control configParts" id="washingHands">
+                        <option value="" selected disabled hidden>Choose Option</option>
+                        <option value="1">True</option>
+                        <option value="0">False (Default)</option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Avoiding Non-Essential Travel (Restaurants
+                            & Parks)</span>
+                    </div>
+                    <select class="form-control configParts" id="avoidNonessential">
+                        <option value="" selected disabled hidden>Choose Option</option>
+                        <option value="1">True </option>
+                        <option value="0">False (Default)</option>
+                    </select>
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Save Scenes (potentially high RAM cost &
+                            crash) </span>
+                    </div>
+                    <select class="form-control configParts" id="saveScenes">
+                        <option value="" selected disabled hidden>Choose Option</option>
+                        <option value="1">True (Default)</option>
+                        <option value="0">False</option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Loop #</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 1" aria-label="asymp"
+                        aria-describedby="basic-addon1" step="1" id="loopTimes">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">Time(s)</label>
+                    </div>
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Set Upperbound 2 weeks</span>
+                    </div>
+                    <select class="form-control configParts" id="upperBound">
+                        <option value="" selected disabled hidden>Choose Option</option>
+                        <option value="1">True </option>
+                        <option value="0">False (Default)</option>
+                    </select>
+                </div>
+
+
+                <div class="lead mb-2 mt-4 text-info"><strong><u>Additional Options</u></strong></div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Tile Width (positive
+                            integer)</span>
+                    </div>
+                    <input type=" number" class="form-control configParts" placeholder="Default: 3"
+                        aria-label="pixelSize" aria-describedby="basic-addon1" id="tileWidth">
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Probability of Coronavirus Transmission
+                            (10
+                            seconds same area)</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 40" aria-label="pTrans"
+                        aria-describedby="basic-addon1" step="5" id="tRate">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">%</label>
+                    </div>
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Mask Rating</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 95" aria-label="mBlock"
+                        aria-describedby="basic-addon1" step="5" id="maskDegrade">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">%</label>
+                    </div>
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Probabilty of Asymptomatic
+                            Transmission (Not going to hospital)</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 80" aria-label="asymp"
+                        aria-describedby="basic-addon1" step="5" id="asympRate">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">%</label>
+                    </div>
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Probabilty of Infection of those
+                            Carrying
+                            the
+                            Virus Every 10 Seconds</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 0.5" aria-label="asymp"
+                        aria-describedby="basic-addon1" step="0.5" id="carryToInf">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">%</label>
+                    </div>
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Probability of Going to a Grocery Store
+                            on
+                            a Given Day</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 42.86 (3/7)"
+                        aria-label="asymp" aria-describedby="basic-addon1" step="5" id="pGroc">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">%</label>
+                    </div>
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Probability of Going to a Park on
+                            a Given Day</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 57.14 (4/7)"
+                        aria-label="asymp" aria-describedby="basic-addon1" step="5" id="pPark">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">%</label>
+                    </div>
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Probability of Going to a Restaurant on
+                            a Given Day</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 28.57 (2/7)"
+                        aria-label="asymp" aria-describedby="basic-addon1" step="5" id="pRes">
+                    <div class="input-group-append">
+                        <label class="input-group-text" for="inputGroupSelect02">%</label>
+                    </div>
+                </div>
+
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Start of Day (Hour 1-12)</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 7" aria-label="asymp"
+                        aria-describedby="basic-addon1" step="1" id="curfM">
+                </div>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Curfew (Hour 13-22)</span>
+                    </div>
+                    <input type="number" class="form-control configParts" placeholder="Default: 21" aria-label="asymp"
+                        aria-describedby="basic-addon1" step="1" id="curfN">
+                </div>
+
+
+
             </div>
-
-            <button data-toggle="collapse" data-target="#configOptions" class="btn btn-sm py-0 btn-dark mt-2 mb-2"
-                id="configOptionButton">→ Configuration
-                Options ←</button>
-            <div class="collapse" id="configOptions">
-                <div class="d-flex justify-content-center mb-2 text-dark">
-                    <div class="lead"><strong>***Fields left blank will use default values***</strong></div>
-                </div>
-                <div class="container mb-1 mt-1" id="configInputs">
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Map</span>
-                        </div>
-                        <select class="form-control configParts" id="map">
-                            <option value="" selected disabled hidden>Choose Option</option>
-                            <option value="1">Map 1 (Default) </option>
-                            <option value="2">Map 2</option>
-                        </select>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Tile Width (positive
-                                integer)</span>
-                        </div>
-                        <input type=" number" class="form-control configParts" placeholder="Default: 3"
-                            aria-label="pixelSize" aria-describedby="basic-addon1" id="tileWidth">
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Chart Increment (Do not change between trials)</span>
-                        </div>
-                        <input type=" number" class="form-control configParts" placeholder="Default: 20"
-                            aria-label="pixelSize" aria-describedby="basic-addon1" id="chartIncrement">
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Humans Per Household</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 2" aria-label="hph"
-                            aria-describedby="basic-addon1" id="humansPerHouseHold">
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Probability of Coronavirus Transmission
-                                (10
-                                seconds same area)</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 40"
-                            aria-label="pTrans" aria-describedby="basic-addon1" step="5" id="tRate">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">%</label>
-                        </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Mask Rating</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 95"
-                            aria-label="mBlock" aria-describedby="basic-addon1" step="5" id="maskDegrade">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">%</label>
-                        </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Probabilty of Asymptomatic
-                                Transmission (Not going to hospital)</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 80"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="5" id="asympRate">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">%</label>
-                        </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Probabilty of Infection of those
-                                Carrying
-                                the
-                                Virus Every 10 Seconds</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 0.5"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="0.5" id="carryToInf">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">%</label>
-                        </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Probability of Going to a Grocery Store
-                                on
-                                a Given Day</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 42.86 (3/7)"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="5" id="pGroc">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">%</label>
-                        </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Probability of Going to a Park on
-                                a Given Day</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 57.14 (4/7)"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="5" id="pPark">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">%</label>
-                        </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Probability of Going to a Restaurant on
-                                a Given Day</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 28.57 (2/7)"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="5" id="pRes">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">%</label>
-                        </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Mask</span>
-                        </div>
-                        <select class="form-control configParts" id="mask">
-                            <option value="" selected disabled hidden>Choose Option</option>
-                            <option value="1">True</option>
-                            <option value="0">False (Default)</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Washing Hands After Coming
-                                Home</span>
-                        </div>
-                        <select class="form-control configParts" id="washingHands">
-                            <option value="" selected disabled hidden>Choose Option</option>
-                            <option value="1">True</option>
-                            <option value="0">False (Default)</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Avoiding Non-Essential Travel (Restaurants
-                                & Parks)</span>
-                        </div>
-                        <select class="form-control configParts" id="avoidNonessential">
-                            <option value="" selected disabled hidden>Choose Option</option>
-                            <option value="1">True </option>
-                            <option value="0">False (Default)</option>
-                        </select>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Save Scenes (potentially high RAM cost &
-                                crash) </span>
-                        </div>
-                        <select class="form-control configParts" id="saveScenes">
-                            <option value="" selected disabled hidden>Choose Option</option>
-                            <option value="1">True </option>
-                            <option value="0">False (Default)</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Start of Day (Hour 1-12)</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 7"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="1" id="curfM">
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Curfew (Hour 13-22)</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 21"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="1" id="curfN">
-                    </div>
-
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Loop #</span>
-                        </div>
-                        <input type="number" class="form-control configParts" placeholder="Default: 1"
-                            aria-label="asymp" aria-describedby="basic-addon1" step="1" id="loopTimes">
-                        <div class="input-group-append">
-                            <label class="input-group-text" for="inputGroupSelect02">Time(s)</label>
-                        </div>
-                    </div>
-
-                    <div class="input-group mb-1">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Set Upperbound 2 weeks</span>
-                        </div>
-                        <select class="form-control configParts" id="upperBound">
-                            <option value="" selected disabled hidden>Choose Option</option>
-                            <option value="1">True </option>
-                            <option value="0">False (Default)</option>
-                        </select>
-                    </div>
-
-                </div>
-                <div class="d-flex justify-content-center mb-2 mt-2">
-                    <button type="button" class="btn btn-primary btn-lg" id="configSimulStart">Run</button>
-                </div>
+            <div class="d-flex justify-content-center mb-2 text-dark">
+                <div class="p5"><strong>***Fields left blank will use default values***</strong></div>
             </div>
-
 
         </div>
 
+        <div class="d-none" id="spinner">
+            <button class="btn btn-primary mb-3 mt-0" type="button" disabled>
+                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                Loading...
+            </button>
+        </div>
     </div>
-    <div class="d-none" id="spinner">
-        <button class="btn btn-primary mb-3 mt-0" type="button" disabled>
-            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-            Loading...
-        </button>
-    </div>
-
-    <div class="container bg-light text-center rounded mb-5">
-        <div class="d-flex justify-content-center" id="simulContainer"></div>
-        <h3 id="num">Time</h3>
-        <button class="btn btn-light border" id="playSimul">Play</button>
-        <button class="btn btn-light border" id="pauseSimul">Pause</button>
-
-        <button class="btn btn-light border" id="fasterSimul"> Faster </button>
-        <button class="btn btn-light border" id="slowerSimul"> Slower </button>
-        <p>Simulation speed: <br /><strong id="simulSpeedFPS"></strong><br /><strong id="simulSpeedTime"></strong>
-        </p>
-
-        <div id="loadState">Loaded till time t= <strong id="loadStateSub"></strong></div>
-        <button class="btn btn-danger" id="pauseQueue">Pause Queue</button>
 
 
-        <div class="container mt-3 mb-3">
-            <canvas id="chartCanvas"></canvas>
+
+    <div class="gray-back-light text-center mb-0">
+        <div class="p-3"></div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-7 offset-lg-1">
+
+                    <div class="d-flex justify-content-center" id="simulContainer"></div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="container mb-2 mt-2 pb-2 bg-dark rounded border border-dark">
+                        <h1 class="mb-1 pt-2 text-white">Key</h1>
+                        <hr class="mt-1" style="background-color: white;">
+                        <div class="mb-2 mt-3">
+                            <div class="h3 mb-3"><span class=" badge badge-dark border border-white text-info">Map
+                                    Features</span>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #d1f797;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Land With No Features</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: black;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Road</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #734000;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Houses</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #b0db09;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Hospitals</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #15bd3c;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Parks</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #a3271c;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Restaurants</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #580075;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Groceries</div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="mb-2 mt-5">
+                            <div class="h2  mb-3"><span class=" badge badge-dark border border-white text-info">Human
+                                    Condition</span>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: white;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Not Infected</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #ffa100;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Carrying the Virus</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white"
+                                        style="background-color: #fb00ff;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Infected & Asymptomatic</div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col-lg-3">
+                                    <div class="d-block p-0 rounded border border-white" style="background-color: red;">
+                                        &ensp;&ensp;
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <div class="d-block p-0 text-white">Infected & Symptomatic</div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
         </div>
 
-        <div class="container" id="dataLog">
+        <h3 class="mb-2 mt-2 text-info h3"><span class="badge badge-dark text-info" id="num"> Time</span></h3>
+        <button class="btn btn-light border border-info" id="playSimul">Play</button>
+        <button class="btn btn-light border border-info" id="pauseSimul">Pause</button>
+        <button class="btn btn-light border border-info" id="fasterSimul"> Faster </button>
+        <button class="btn btn-light border border-info" id="slowerSimul"> Slower </button>
+        <button class="btn btn-light border border-info" id="nextSimul"> Next </button>
+        <button class="btn btn-light border border-info" id="prevSimul"> Previous </button>
+        <div class="row mt-4 mb-4">
+            <div class="col-lg-2 offset-lg-5">
+                <input type="number" placeholder="Go to time t = " class="form-control" id="frameTimeGo">
+            </div>
+            <div class="col-lg-1 text-left">
+                <button class="btn btn-primary" id="frameGo">Go</button>
+            </div>
+
+        </div>
+
+        <div id="loadState" class="h4 mb-2 mt-2"><span class="badge badge-light border border-dark"> Loaded till time t=
+                <strong id="loadStateSub"></strong></span></div>
+        <button class="btn btn-danger" id="pauseQueue">Terminate Queue</button>
+
+
+        <div class="container-fluid mt-3 mb-3">
+            <canvas id="chartCanvas" class="rounded border border-dark p-2"></canvas>
+        </div>
+
+        <div class="container pb-2" id="dataLog">
             <textarea id="copyableData" cols="10" rows="10000" style="height:0px;margin:0px;padding:0px;opacity:0"
                 readonly></textarea>
             <br>
-            <button class="btn btn-warning mt-2 mb-2" id="copyData">Copy Data</button>
+            <button class="btn btn-warning mb-2" id="copyData">Copy Data</button>
         </div>
     </div>
 
-
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">Copyright &copy; COVID-19 Simulation 2020</p>
+        </div>
+    </footer>
 
 
     <script src="simulation.js"></script>

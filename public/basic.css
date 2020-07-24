@@ -1,0 +1,20 @@
+html {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #FF0000;
+}
+
+.gray-back-light {
+    background-color: #ebebeb;
+}
+
+.turq-back-light {
+    background-color: #a3f3ff;
+}

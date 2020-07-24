@@ -17,7 +17,7 @@ let numScenes = 0;
 
 let paramBase = {
     tileWidth: 3,
-    humansPerHouseHold: 2,
+    humansPerHouseHold: 3,
     tRate: 0.4,
     maskDegrade: 0.05,
     asympRate: 0.8,
@@ -34,7 +34,7 @@ let paramBase = {
     chartIncrement: 120,
     avoidNonessential: false,
     loopTimes: 1,
-    saveScenes: false,
+    saveScenes: true,
     upperBound: false,
     map: 1,
 }
@@ -50,18 +50,11 @@ function popupMessage(title, message) {
 }
 
 //Simulation start Listener Creation
-const defaultSimulStartElem = document.getElementById("defaultSimulStart"),
-    configSimulStartElem = document.getElementById("configSimulStart"),
+const configSimulStartElem = document.getElementById("configSimulStart"),
     configPartsElems = Array.prototype.slice.call(document.getElementsByClassName("configParts")),
     configOptionButtonElem = document.getElementById("configOptionButton"),
     configOptionsElem = document.getElementById("configOptions");
 
-
-defaultSimulStartElem.addEventListener("click", () => {
-    param = { ...paramBase };
-    curLoopIndex = 0;
-    endConfig();
-})
 
 configSimulStartElem.addEventListener("click", () => {
     param = { ...paramBase };
@@ -604,17 +597,16 @@ const pauseSimulElem = document.querySelector("#pauseSimul");
 const pauseQueueElem = document.querySelector("#pauseQueue");
 const fasterSimulElem = document.querySelector("#fasterSimul");
 const slowerSimulElem = document.querySelector("#slowerSimul");
-const simulSpeedFPSElem = document.querySelector("#simulSpeedFPS");
 const simulSpeedTimeElem = document.querySelector("#simulSpeedTime");
+const frameGoElem = document.querySelector("#frameGo");
+const frameTimeGoElem = document.querySelector("#frameTimeGo");
+const nextSimulElem = document.querySelector("#nextSimul");
+const prevSimulElem = document.querySelector("#prevSimul");
 
 let intervalTime = 100;
 let curSceneNum = 0;
-let saveFPSTime;
 let updateWorld = () => {
     let { tileWidth, curfM, curfN } = param;
-    simulSpeedTimeElem.textContent = `1 Scene per ${intervalTime} ms`
-    saveFPSTime != null ? simulSpeedFPSElem.textContent = `${Math.round(1000 / (Date.now() - saveFPSTime))} fps` : null
-    saveFPSTime = Date.now();
     if (scenes.length < curSceneNum + 1) {
         viewInterval !== null ? (clearInterval(viewInterval), viewInterval = null) : null;
         return;
@@ -642,25 +634,41 @@ let updateWorld = () => {
 
 
 
-    numElem.textContent = `Day ${tempDay}, ${tempHr < 10 ? "0" + tempHr : tempHr}:${tempMin < 10 ? "0" + tempMin : tempMin}`;
+    numElem.textContent = `Day ${tempDay}, ${tempHr < 10 ? "0" + tempHr : tempHr}:${tempMin < 10 ? "0" + tempMin : tempMin}, t = ${curSceneNum}`;
 
-    curSceneNum++;
 
     //simulSpeedElem.textContent = "0 fps"
 
 
 }
 
+nextSimulElem.addEventListener("click", () => {
+    clearSceneIntervals();
+    curSceneNum++;
+    updateWorld();
+})
 
+prevSimulElem.addEventListener("click", () => {
+    clearSceneIntervals();
+    console.log(curSceneNum);
+    curSceneNum--;
+    console.log(curSceneNum);
+    updateWorld();
+})
 
+frameGoElem.addEventListener("click", () => {
+    clearSceneIntervals();
+    curSceneNum = parseInt(frameTimeGoElem.value);
+    updateWorld();
+})
 
 
 playSimulElem.addEventListener("click", () => {
-    viewInterval === null ? startSceneIntervals() : null;
+    startSceneIntervals();
 })
 
 pauseSimulElem.addEventListener("click", () => {
-    viewInterval !== null ? clearSceneIntervals() : null;
+    clearSceneIntervals();
     viewInterval = null;
 })
 
@@ -686,7 +694,7 @@ function clearSceneIntervals() {
 }
 
 function startSceneIntervals() {
-    viewInterval = setInterval(updateWorld, intervalTime);
+    viewInterval = setInterval(() => { updateWorld(); curSceneNum++; }, intervalTime);
 }
 
 
