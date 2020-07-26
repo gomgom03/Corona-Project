@@ -1,4 +1,6 @@
 
+
+
 let time = Date.now();
 
 const pixelSize = 250
@@ -598,8 +600,6 @@ const pauseQueueElem = document.querySelector("#pauseQueue");
 const fasterSimulElem = document.querySelector("#fasterSimul");
 const slowerSimulElem = document.querySelector("#slowerSimul");
 const simulSpeedTimeElem = document.querySelector("#simulSpeedTime");
-const frameGoElem = document.querySelector("#frameGo");
-const frameTimeGoElem = document.querySelector("#frameTimeGo");
 const nextSimulElem = document.querySelector("#nextSimul");
 const prevSimulElem = document.querySelector("#prevSimul");
 
@@ -656,11 +656,6 @@ prevSimulElem.addEventListener("click", () => {
     updateWorld();
 })
 
-frameGoElem.addEventListener("click", () => {
-    clearSceneIntervals();
-    curSceneNum = parseInt(frameTimeGoElem.value);
-    updateWorld();
-})
 
 
 playSimulElem.addEventListener("click", () => {

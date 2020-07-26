@@ -19,7 +19,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/javascript-astar/0.4.1/astar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gpu.js@latest/dist/gpu-browser.min.js"></script>
+
 </head>
 
 <body class="m-0 bg-info">
@@ -44,7 +44,7 @@
     </div>
 
     <nav class="navbar navbar-dark navbar-expand-md bg-dark justify-content-between">
-        <img src="/icon/face-mask-drawing2.png" alt="" height="30px">
+        <img src="/icon/face-mask-drawing2.png" alt="" height="30px" class="mb-1 mt-1">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-nav">
                 <span class="navbar-toggler-icon"></span>
@@ -327,141 +327,148 @@
                 </div>
                 <div class="col-lg-3">
                     <div class="container mb-2 mt-2 pb-2 bg-dark rounded border border-dark">
-                        <h1 class="mb-1 pt-2 text-white">Key</h1>
-                        <hr class="mt-1" style="background-color: white;">
-                        <div class="mb-2 mt-3">
-                            <div class="h3 mb-3"><span class=" badge badge-dark border border-white text-info">Map
-                                    Features</span>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #d1f797;">
-                                        &ensp;&ensp;
-                                    </div>
-                                </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Land With No Features</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: black;">
-                                        &ensp;&ensp;
-                                    </div>
-                                </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Road</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #734000;">
-                                        &ensp;&ensp;
-                                    </div>
-                                </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Houses</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #b0db09;">
-                                        &ensp;&ensp;
-                                    </div>
-                                </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Hospitals</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #15bd3c;">
-                                        &ensp;&ensp;
-                                    </div>
-                                </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Parks</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #a3271c;">
-                                        &ensp;&ensp;
-                                    </div>
-                                </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Restaurants</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #580075;">
-                                        &ensp;&ensp;
-                                    </div>
-                                </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Groceries</div>
-                                </div>
-                            </div>
-
+                        <div class="pb-1 pt-2 mb-2 text-white" data-toggle="collapse" data-target="#keyItems">
+                            <h1>Key</h1>
+                            <small class="m-0">(Click to Expand or Collapse)</small>
                         </div>
-                        <div class="mb-2 mt-5">
-                            <div class="h2  mb-3"><span class=" badge badge-dark border border-white text-info">Human
-                                    Condition</span>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: white;">
-                                        &ensp;&ensp;
+                        <div class="collapse" id="keyItems">
+                            <div>
+                                <div class="h3 mb-3"><span class=" badge badge-dark border border-white text-info">Map
+                                        Features</span>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #d1f797;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Land With No Features</div>
                                     </div>
                                 </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Not Infected</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #ffa100;">
-                                        &ensp;&ensp;
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: black;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Road</div>
                                     </div>
                                 </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Carrying the Virus</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white"
-                                        style="background-color: #fb00ff;">
-                                        &ensp;&ensp;
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #734000;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Houses</div>
                                     </div>
                                 </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Infected & Asymptomatic</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2 mt-2">
-                                <div class="col-lg-3">
-                                    <div class="d-block p-0 rounded border border-white" style="background-color: red;">
-                                        &ensp;&ensp;
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #b0db09;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Hospitals</div>
                                     </div>
                                 </div>
-                                <div class="col-lg-9">
-                                    <div class="d-block p-0 text-white">Infected & Symptomatic</div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #15bd3c;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Parks</div>
+                                    </div>
                                 </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #a3271c;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Restaurants</div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #580075;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Groceries</div>
+                                    </div>
+                                </div>
+
                             </div>
+                            <div class="mb-2 mt-5">
+                                <div class="h2  mb-3"><span
+                                        class=" badge badge-dark border border-white text-info">Human
+                                        Condition</span>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: white;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Not Infected</div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #ffa100;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Carrying the Virus</div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: #fb00ff;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Infected & Asymptomatic</div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-2">
+                                    <div class="col-lg-3">
+                                        <div class="d-block p-0 rounded border border-white"
+                                            style="background-color: red;">
+                                            &ensp;&ensp;
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="d-block p-0 text-white">Infected & Symptomatic</div>
+                                    </div>
+                                </div>
 
 
+                            </div>
                         </div>
+
                     </div>
 
 
@@ -477,15 +484,7 @@
         <button class="btn btn-light border border-info" id="slowerSimul"> Slower </button>
         <button class="btn btn-light border border-info" id="nextSimul"> Next </button>
         <button class="btn btn-light border border-info" id="prevSimul"> Previous </button>
-        <div class="row mt-4 mb-4">
-            <div class="col-lg-2 offset-lg-5">
-                <input type="number" placeholder="Go to time t = " class="form-control" id="frameTimeGo">
-            </div>
-            <div class="col-lg-1 text-left">
-                <button class="btn btn-primary" id="frameGo">Go</button>
-            </div>
 
-        </div>
 
         <div id="loadState" class="h4 mb-2 mt-2"><span class="badge badge-light border border-dark"> Loaded till time t=
                 <strong id="loadStateSub"></strong></span></div>
@@ -510,7 +509,7 @@
         </div>
     </footer>
 
-
+    <script src="mobileWarning.js"></script>
     <script src="simulation.js"></script>
 
 </body>

@@ -26,3 +26,11 @@ app.get('/test', (req, res) => {
 app.get('/about', (req, res) => {
     res.render("about.ejs")
 });
+
+app.get('/research', (req, res) => {
+    res.render("research.ejs")
+})
+
+app.use(function (req, res, next) {
+    res.status(404).send("404 Error: This page does not exist.")
+})
