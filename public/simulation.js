@@ -1,47 +1,70 @@
 
+//DOM variables
+const numElem = document.getElementById("num"),
+    loadStateSubElem = document.querySelector("#loadStateSub"),
+    spinnerElem = document.getElementById("spinner"),
+    configSimulStartElem = document.getElementById("configSimulStart"),
+    configPartsElems = Array.prototype.slice.call(document.getElementsByClassName("configParts")),
+    configOptionButtonElem = document.getElementById("configOptionButton"),
+    configOptionsElem = document.getElementById("configOptions"),
+    mapAreaTotalElem = document.getElementById("mapAreaTotal"),
+    mapAreaTotalToggleElem = document.getElementById("mapAreaTotalToggle"),
+    playSimulElem = document.querySelector("#playSimul"),
+    pauseSimulElem = document.querySelector("#pauseSimul"),
+    pauseQueueElem = document.querySelector("#pauseQueue"),
+    fasterSimulElem = document.querySelector("#fasterSimul"),
+    slowerSimulElem = document.querySelector("#slowerSimul"),
+    simulSpeedTimeElem = document.querySelector("#simulSpeedTime"),
+    nextSimulElem = document.querySelector("#nextSimul"),
+    prevSimulElem = document.querySelector("#prevSimul"),
+    chartCanvasElem = document.getElementById("chartCanvas"),
+    chartCanvasCtx = chartCanvasElem.getContext("2d"),
+    copyableDataElem = document.getElementById("copyableData"),
+    copyDataElem = document.getElementById("copyData"),
+    simulContainerElem = document.getElementById("simulContainer");
 
-
-let time = Date.now();
-
-const pixelSize = 250
-let savedMap = null;
-let scenes = [];
-let numHouses;
-const frameTime = 10;
-const numElem = document.getElementById("num");
-const loadStateSubElem = document.querySelector("#loadStateSub");
-const spinnerElem = document.getElementById("spinner")
-let curInfected = 1;
-let batchId = null;
-let endConfigResolved = true;
-let curLoopIndex = 0;
-let numScenes = 0;
-
-let paramBase = {
-    tileWidth: 3,
-    humansPerHouseHold: 3,
-    tRate: 0.4,
-    maskDegrade: 0.05,
-    asympRate: 0.8,
-    tRateLoss: 3,
-    airflow: 0.5,
-    pGroc: 3 / 7,
-    pRes: 2 / 7,
-    pPark: 4 / 7,
-    curfM: 7,
-    curfN: 21,
-    mask: false,
-    carryToInf: 0.05,
-    washingHands: false,
-    chartIncrement: 120,
-    avoidNonessential: false,
-    loopTimes: 1,
-    saveScenes: true,
-    upperBound: false,
-    map: 1,
-}
-
-let param = {}
+//Instantiation of Variables
+let pixelSize = 250,
+    savedMap,
+    scenes = [],
+    numHouses,
+    frameTime = 10,
+    curInfected = 1,
+    batchId,
+    endConfigResolved = true,
+    curLoopIndex = 0,
+    numScenes = 0,
+    viewInterval,
+    intervalTime = 100,
+    curSceneNum = 0,
+    totTime,
+    maxTime,
+    returnTime = 2,
+    continueQueue = true,
+    param = {},
+    paramBase = {
+        tileWidth: 3,
+        humansPerHouseHold: 3,
+        tRate: 0.4,
+        maskDegrade: 0.05,
+        asympRate: 0.8,
+        tRateLoss: 3,
+        airflow: 0.5,
+        pGroc: 3 / 7,
+        pRes: 2 / 7,
+        pPark: 4 / 7,
+        curfM: 7,
+        curfN: 21,
+        mask: false,
+        carryToInf: 0.05,
+        washingHands: false,
+        chartIncrement: 120,
+        avoidNonessential: false,
+        loopTimes: 1,
+        saveScenes: true,
+        upperBound: false,
+        map: 1,
+    };
 
 $('#popupModal').modal({ show: false })
 
@@ -52,11 +75,6 @@ function popupMessage(title, message) {
 }
 
 //Simulation start Listener Creation
-const configSimulStartElem = document.getElementById("configSimulStart"),
-    configPartsElems = Array.prototype.slice.call(document.getElementsByClassName("configParts")),
-    configOptionButtonElem = document.getElementById("configOptionButton"),
-    configOptionsElem = document.getElementById("configOptions");
-
 
 configSimulStartElem.addEventListener("click", () => {
     param = { ...paramBase };
@@ -90,7 +108,6 @@ configSimulStartElem.addEventListener("click", () => {
                 case "map": tempObj[id] = val; break;
                 default:
                     errMessage += "Internal Error";
-
             }
         }
     });
@@ -98,13 +115,10 @@ configSimulStartElem.addEventListener("click", () => {
         for (let key in tempObj) {
             param[key] = tempObj[key]
         }
-
         endConfig();
     } else {
         popupMessage("Error", errMessage)
-
     }
-
 })
 
 function endConfig() {
@@ -120,6 +134,7 @@ function endConfig() {
             endConfigResolved = true;
             spinnerElem.className = "d-none";
             configOptionsElem.className === "collapse show" ? configOptionButtonElem.click() : null;
+            param.saveScenes ? mapAreaTotalElem.className === "collapse" ? mapAreaTotalToggleElem.click() : null : mapAreaTotalElem.className === "collapse show" ? mapAreaTotalToggleElem.click() : null;
             chartData.datasetIndex++;
             chartData.createNewDataset(scatterChart.data.datasets);
         }, 1000)
@@ -127,7 +142,7 @@ function endConfig() {
 }
 
 function resetAll() {
-    world.canvas != null ? document.getElementById("simulContainer").removeChild(world.canvas) : null;
+    world.canvas != null ? simulContainerElem.removeChild(world.canvas) : null;
     world.canvas = null;
     world.tiles = [];
     world.humans = [];
@@ -162,7 +177,7 @@ const world = {
         this.canvas.width = pixelSize * tileWidth;
         this.canvas.height = pixelSize * tileWidth;
         this.context = this.canvas.getContext('2d', { alpha: false });
-        document.getElementById("simulContainer").appendChild(this.canvas);
+        simulContainerElem.appendChild(this.canvas);
         createMap();
         presetHumans();
         createSimul();
@@ -203,7 +218,6 @@ function createWorld(wd, data) {
     for (let i = 0; i < rowData.length; i++) {
         rowData[i] = rowData[i].split('\t')
     }
-    console.log(Date.now() - time);
     let { canvas, tiles, humans, context } = wd;
     let { tileWidth, humansPerHouseHold } = param;
     for (let i = 0; i < canvas.width / tileWidth; i++) {
@@ -223,7 +237,6 @@ function createWorld(wd, data) {
                 case 5: color = "#a3271c"; tileType = "restaurants"; break;
                 case 6: color = "#580075"; tileType = "groceries"; break;
             }
-
             rowData[j][i].indexOf('o') !== -1 ? (wd.origins[tileType].push({ x: i, y: j })) : null;
             tempTileRow.push({
                 num: num,
@@ -238,9 +251,6 @@ function createWorld(wd, data) {
     }
     numHouses = world.origins.houses.length;
     savedMap = context.getImageData(0, 0, pixelSize * tileWidth, pixelSize * tileWidth);
-
-    //create world layout
-
     //filling human objects
     for (let i = 0; i < numHouses; i++) {
         for (let j = 0; j < humansPerHouseHold; j++) {
@@ -268,7 +278,6 @@ function createWorld(wd, data) {
     }
 }
 
-
 function presetHumans() {
     let { humans } = world;
     let { humansPerHouseHold } = param;
@@ -276,7 +285,6 @@ function presetHumans() {
     humans[infHumanIndex].coronaState.has = true;
     humans[infHumanIndex].coronaState.asymptomatic = true;
 }
-
 
 function component(width, height, color, x, y, instantUpdate) {
     this.width = width;
@@ -292,14 +300,7 @@ function component(width, height, color, x, y, instantUpdate) {
     instantUpdate ? this.update() : null;
 }
 
-let totTime, maxTime, returnTime;
-returnTime = 2;
-
-let continueQueue = true;
-
-
 function pathFind(grid, humanObj, target) {
-    //let { graph } = world;
     let graph = new Graph(world.walkableTiles);
     let start = graph.grid[humanObj.curCoords.x][humanObj.curCoords.y];
     let end = graph.grid[target.x][target.y];
@@ -308,15 +309,8 @@ function pathFind(grid, humanObj, target) {
     for (let i = 0; i < result.length; i++) {
         usefulInfo.push({ x: result[i].x, y: result[i].y })
     }
-    //usefulInfo.length === 0 ? console.log(JSON.parse(JSON.stringify(grid)), JSON.parse(JSON.stringify(humanObj)), JSON.parse(JSON.stringify(target))) : null
     usefulInfo.length !== 0 ? humanObj.curPath = usefulInfo : humanObj.curTask === "goHomeF" ? humanObj.curTask = "wanderF" : humanObj.curTask = "none";
 }
-
-
-
-
-
-
 
 function findShortest(origin, finalCoords) {
     let len = Math.ceil(pixelSize * Math.sqrt(2));
@@ -362,13 +356,10 @@ function moveHuman(human, per) {
         }
         human.curCoords.x += deltX;
         human.curCoords.y += deltY;
-        //human === world.humans[0] ? console.log(deltX, deltY, human) : null
         if (curTask !== "wanderF") {
             randTest(0.005) ? randTest(0.5) ? (human.curTask = "goHome", setPath(human, human.curTask)) : assignTask(human, per) : null;
         }
-
     } else {
-        //if (curTask === "goHome") { console.log(human, human.curPath[0]); }
         human.curCoords = human.curPath[0];
         human.curPath.shift();
         if (human.curPath.length === 0) {
@@ -381,10 +372,8 @@ function moveHuman(human, per) {
                 curTask === "goHome" && human.coronaState.carrying && washingHands ? (human.coronaState.carrying = false) : null;
                 human.curTask = "none"
             }
-
         }
     }
-
     world.tiles[human.curCoords.x][human.curCoords.y].humans.push(human);
     human.atHome ? world.tiles[human.curCoords.x][human.curCoords.y].num !== 2 ? human.atHome = false : null : world.tiles[human.curCoords.x][human.curCoords.y].num === 2 ? human.atHome = true : null;
 }
@@ -402,12 +391,9 @@ function setPath(human, task) {
     let { walkableTiles } = world;
     if (task === "goHome" || task === "goHomeF") {
         human.atHome ? human.curTask = "none" : pathFind(walkableTiles, human, human.originCoords);
-        //console.log(JSON.parse(JSON.stringify(human)), JSON.parse(JSON.stringify(human.originCoords)))
-
     } else {
         pathFind(walkableTiles, human, findShortest(human.curCoords, world.origins[task]));
     }
-
 }
 
 function setTasks(humans) {
@@ -420,8 +406,7 @@ function setTasks(humans) {
         temp = randSort(temp);
         h.dayTasks = temp;
         h.curTask = "none";
-    })
-    console.log("Set Task Complete")
+    });
 }
 
 //Fisher Yates
@@ -463,18 +448,15 @@ function infect(human) {
                 if (!(tempCoordx < 0 || tempCoordx >= pixelSize || tempCoordy < 0 || tempCoordy >= pixelSize || world.tiles[tempCoordx][tempCoordy].num !== world.tiles[curCoords.x][curCoords.y].num)) {
                     let tempRate;
                     mask ? tempRate = tRate * maskDegrade : tempRate = tRate;
-                    //console.log(tempRate);
                     world.tiles[tempCoordx][tempCoordy].humans.forEach(h => {
                         if ((h.coronaState.has) && randTest(tempRate)) {
                             coronaState.carrying = true;
                         }
                     })
-
                 }
             }
         }
     }
-
 }
 
 function createSimul() {
@@ -484,9 +466,6 @@ function createSimul() {
     let dayTime = 0;
     let ceilTime = (curfN - curfM) * 3600 / frameTime
     maxTime = (curfN - curfM + Math.ceil(pixelSize * returnTime * frameTime / 3600)) * 3600 / frameTime;
-
-    //while (infCount < numHouses * humansPerHouseHold) {
-
     async function queueScene() {
         makeScene(dayTime, ceilTime, maxTime, batchId).then(s => {
             if (curInfected < numHouses * humansPerHouseHold && s.id === batchId && ((upperBound && 14 * (curfN - curfM + 2) * 60 * 6 > numScenes) || !upperBound)) {
@@ -501,24 +480,19 @@ function createSimul() {
                 }, 1);
             } else {
                 addScatter(true);
-                console.log(curLoopIndex, loopTimes);
                 curLoopIndex < loopTimes ? endConfig() : null;
             }
         })
     }
 
-
-
     let makeScene = async (dayTime, ceilTime, maxTime, bid) => {
         dayTime === 0 ? setTasks(world.humans) : null;
         //if hour is 10pm or more, human should be returning to origin
-        //console.log(JSON.parse(JSON.stringify(world.humans)))
         let scene = [];
         dayTime === ceilTime ? world.humans.forEach(h => {
             moveHuman(h, dayTime / maxTime);
             h.curTask = "goHomeF";
             setPath(h, "goHomeF");
-
             scene.push(createSceneHuman(h));
         }) : world.humans.forEach(h => {
             moveHuman(h, dayTime / maxTime);
@@ -543,31 +517,20 @@ function createSimul() {
         }
 
         loadStateSubElem.textContent = numScenes;
-        //world.humans.forEach(h => { scene.push(JSON.parse(JSON.stringify(h.curCoords))) });
-        //world.humans.forEach(h => { scene.push(Object.assign({}, h.curCoords)) });
         world.humans.forEach(h => infect(h));
         return { scene: scene, id: bid };
     }
     queueScene();
 
-
-
-
     /*
+    //Code Without Async Await functions
+
     for (let i = 0; i < 10000; i++) {
-        //console.log(dayTime, maxTime)
         dayTime === 0 ? setTasks(world.humans) : null;
         //if hour is 10pm or more, human should be returning to origin
-        //console.log(JSON.parse(JSON.stringify(world.humans)))
         let scene = [];
         dayTime === ceilTime ? world.humans.forEach(h => { moveHuman(h, dayTime / maxTime); h.curTask = "goHomeF"; setPath(h, "goHomeF"); scene.push(Object.assign({}, h.curCoords)) }) : world.humans.forEach(h => { moveHuman(h, dayTime / maxTime); scene.push(Object.assign({}, h.curCoords)); });
- 
- 
-        //world.humans.forEach(h => { scene.push(JSON.parse(JSON.stringify(h.curCoords))) });
-        //world.humans.forEach(h => { scene.push(Object.assign({}, h.curCoords)) });
- 
         scenes.push(scene);
- 
         dayTime++;
         dayTime === maxTime ? (dayTime = 0) : null;
     }
@@ -580,8 +543,6 @@ function createSimul() {
      * 
      */
 
-
-    //corona checking
     /**
      * compare distance to other humans
      * trasmit by probability of transmission
@@ -589,22 +550,6 @@ function createSimul() {
      */
 }
 
-//let worldInterval = setInterval(updateWorld, intervalTime);
-
-
-
-let viewInterval = null;
-const playSimulElem = document.querySelector("#playSimul");
-const pauseSimulElem = document.querySelector("#pauseSimul");
-const pauseQueueElem = document.querySelector("#pauseQueue");
-const fasterSimulElem = document.querySelector("#fasterSimul");
-const slowerSimulElem = document.querySelector("#slowerSimul");
-const simulSpeedTimeElem = document.querySelector("#simulSpeedTime");
-const nextSimulElem = document.querySelector("#nextSimul");
-const prevSimulElem = document.querySelector("#prevSimul");
-
-let intervalTime = 100;
-let curSceneNum = 0;
 let updateWorld = () => {
     let { tileWidth, curfM, curfN } = param;
     if (scenes.length < curSceneNum + 1) {
@@ -631,16 +576,10 @@ let updateWorld = () => {
     let tempHr = tempFullTime % (curfN - curfM + returnTime) + curfM;
     tempFullTime = Math.floor(tempFullTime / (curfN - curfM + returnTime));
     let tempDay = tempFullTime;
-
-
-
     numElem.textContent = `Day ${tempDay}, ${tempHr < 10 ? "0" + tempHr : tempHr}:${tempMin < 10 ? "0" + tempMin : tempMin}, t = ${curSceneNum}`;
-
-
-    //simulSpeedElem.textContent = "0 fps"
-
-
 }
+
+//Simulation Button Logic
 
 nextSimulElem.addEventListener("click", () => {
     clearSceneIntervals();
@@ -650,13 +589,9 @@ nextSimulElem.addEventListener("click", () => {
 
 prevSimulElem.addEventListener("click", () => {
     clearSceneIntervals();
-    console.log(curSceneNum);
     curSceneNum--;
-    console.log(curSceneNum);
     updateWorld();
 })
-
-
 
 playSimulElem.addEventListener("click", () => {
     startSceneIntervals();
@@ -692,15 +627,7 @@ function startSceneIntervals() {
     viewInterval = setInterval(() => { updateWorld(); curSceneNum++; }, intervalTime);
 }
 
-
-
-
 //GRAPH AND COPYABLE DATA
-
-const chartCanvasElem = document.getElementById("chartCanvas"),
-    chartCanvasCtx = chartCanvasElem.getContext("2d"),
-    copyableDataElem = document.getElementById("copyableData"),
-    copyDataElem = document.getElementById("copyData");
 
 copyDataElem.addEventListener("click", () => {
     let tempText = "x";
@@ -719,7 +646,6 @@ copyDataElem.addEventListener("click", () => {
     copyableDataElem.select();
     document.execCommand("copy") ? popupMessage("Success!", "You have successfully copied the data to your clipboard.") : popupMessage("Failure.", "Unable to copy data to clipboard. Check if you have data.");
 })
-
 
 let scatterChart = new Chart(chartCanvasCtx, {
     type: 'scatter',
@@ -750,9 +676,7 @@ let scatterChart = new Chart(chartCanvasCtx, {
 
 const chartData = {
     datasetIndex: -1,
-    dataText: {
-
-    },
+    dataText: {},
     generateColor: function () {
         return '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
     },
@@ -773,7 +697,6 @@ const chartData = {
     createNewDataset: function (datasets) {
         let { humansPerHouseHold } = param
         let tClr = this.generateColor();
-        console.log(tClr)
         let tClrD = this.darkenColor(tClr);
         datasets.push({
             label: `Dataset ${this.datasetIndex + 1}`,
@@ -789,7 +712,7 @@ function addScatter(force = false) {
     let tempX = frameTime * totTime / 60
     let tempY = curInfected / humansPerHouseHold / numHouses * 100;
     force || totTime % chartIncrement === 0 ? (
-        scatterChart.data.datasets[chartData.datasetIndex].data.push({ y: tempY, x: tempX }),// + (24 - returnTime - curfN + curfM) * 60 }),
+        scatterChart.data.datasets[chartData.datasetIndex].data.push({ y: tempY, x: tempX }),
         scatterChart.update(),
         chartData.dataText[tempX] == null ? chartData.dataText[tempX] = [] : null,
         chartData.dataText[tempX][chartData.datasetIndex] = tempY

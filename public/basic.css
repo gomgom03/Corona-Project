@@ -18,3 +18,11 @@ html {
 .turq-back-light {
     background-color: #a3f3ff;
 }
+
+.line-col-left {
+    border-left: 1px solid white;
+}
+
+.line-col-right {
+    border-right: 1px solid white;
+}
