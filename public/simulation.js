@@ -66,6 +66,8 @@ let pixelSize = 250,
         map: 1,
     };
 
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) { paramBase.tileWidth = 1 };
+
 $('#popupModal').modal({ show: false })
 
 function popupMessage(title, message) {

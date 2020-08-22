@@ -23,6 +23,4 @@ html {
     border-left: 1px solid white;
 }
 
-.line-col-right {
-    border-right: 1px solid white;
-}
+.line-col-right {}
