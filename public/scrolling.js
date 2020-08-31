@@ -1,6 +1,7 @@
-
-$("#aboutButton").click(() => {
+function scrollable(hash) {
     $('html, body').animate({
-        scrollTop: $("#about").offset().top
-    }, 1000);
-});
+        scrollTop: $(hash).offset().top
+    }, 100, function () {
+        window.location.hash = hash;
+    });
+}

@@ -19,7 +19,9 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/javascript-astar/0.4.1/astar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
-
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <script src="scrolling.js"></script>
 </head>
 
 <body class="m-0 bg-info">
@@ -69,22 +71,23 @@
 
             <div class="navbar-collapse collapse dual-nav w-50 order-2">
                 <ul class="nav navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link" href="https://github.com/gomgom03/Corona-Project">Github<i
-                                class="fa fa-github"></i></a></li>
+                    <li class="nav-item"><a class="nav-link" href="https://github.com/gomgom03/Corona-Project">Github <i
+                                class="fab fa-github"></i></a></li>
                 </ul>
             </div>
 
         </div>
     </nav>
 
-    <header class="bg-info text-white">
+    <header class="bg-info masthead">
         <div class="container text-center pt-2 pb-2">
-            <h1 class="pt-4">Welcome to the simulation page!</h1>
-            <p class="lead pb-1 text-light">Creation of spread simulation and collection of data for analysis</p>
+            <div class="mastmaintxt">Welcome to the simulation!</div>
+            <div class="mastsubtxt">Creation of spread simulation and collection of data for analysis</div>
+            <i class="fas fa-chevron-down downicon" onclick="scrollable('#scrollhere')"></i>
         </div>
     </header>
 
-    <div class="bg-light text-black mt-3 pb-3 pt-3 in text-center">
+    <div id="scrollhere" class=" bg-light text-black mt-3 pb-3 pt-3 in text-center">
         <div class="d-flex justify-content-center mb-2 mt-2">
             <button type="button" class="btn btn-primary btn-lg" id="configSimulStart">Run Simulation</button>
         </div>
@@ -146,7 +149,8 @@
 
                 <div class="input-group mb-1">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Avoiding Non-Essential Travel (Restaurants
+                        <span class="input-group-text" id="basic-addon1">Avoiding Non-Essential Travel
+                            (Restaurants
                             & Parks)</span>
                     </div>
                     <select class="form-control configParts" id="avoidNonessential">
@@ -157,7 +161,8 @@
                 </div>
                 <div class="input-group mb-1">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Save Scenes (potentially high RAM cost &
+                        <span class="input-group-text" id="basic-addon1">Save Scenes (potentially high RAM cost
+                            &
                             crash) </span>
                     </div>
                     <select class="form-control configParts" id="saveScenes">
@@ -488,7 +493,8 @@
             <button class="btn btn-light border border-info" id="prevSimul"> Previous </button>
         </div>
 
-        <div id="loadState" class="h4 mb-2 pt-2"><span class="badge badge-light border border-dark"> Loaded till time t=
+        <div id="loadState" class="h4 mb-2 pt-2"><span class="badge badge-light border border-dark"> Loaded till
+                time t=
                 <strong id="loadStateSub"></strong></span></div>
         <button class="btn btn-danger" id="pauseQueue">Terminate Queue</button>
 
