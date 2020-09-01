@@ -20,8 +20,18 @@ html {
     background-color: #a3f3ff;
 }
 
-.line-col-left {
-    border-left: 1px solid white;
+@media (min-width: 990px) {
+    .line-col-left {
+        border-top: 0;
+        border-left: 1px solid white;
+    }
+}
+
+@media (max-width: 990px) {
+    .line-col-left {
+        border-left: 0;
+        border-top: 1px solid white;
+    }
 }
 
 .masthead {
@@ -42,7 +52,7 @@ html {
     color: white;
 }
 
-@media (max-width: 10800px) {
+@media (max-width: 1080px) {
     .mastsubtxt {
         font-size: 1em;
     }
